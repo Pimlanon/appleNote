@@ -11,37 +11,39 @@
         >to your account
       </p>
 
-      <div class="mt-8">
-        <label for="" class="text-zinc-300 text-sm block mb-0.5"
-          >Email Address</label
-        >
-        <input
-          type="email"
-          class="block w-full bg-[#27272A] border border-[#3F3F46] rounded text-white text-sm px-4 py-2 placeholder:text-zinc-500"
-          placeholder="you@example.com"
-        />
-      </div>
+      <form @submit.prevent="submit">
+        <div class="mt-8">
+          <label for="" class="text-zinc-300 text-sm block mb-0.5"
+            >Email Address</label
+          >
+          <input
+            type="email"
+            class="block w-full bg-[#27272A] border border-[#3F3F46] rounded text-white text-sm px-4 py-2 placeholder:text-zinc-500"
+            placeholder="you@example.com"
+          />
+        </div>
 
-      <div class="mt-6">
-        <label for="" class="text-zinc-300 text-sm block mb-0.5"
-          >Password</label
-        >
-        <input
-          type="password"
-          class="block w-full bg-[#27272A] border border-[#3F3F46] rounded text-white text-sm px-4 py-2 placeholder:text-zinc-500"
-          placeholder="*********"
-        />
-      </div>
+        <div class="mt-6">
+          <label for="" class="text-zinc-300 text-sm block mb-0.5"
+            >Password</label
+          >
+          <input
+            type="password"
+            class="block w-full bg-[#27272A] border border-[#3F3F46] rounded text-white text-sm px-4 py-2 placeholder:text-zinc-500"
+            placeholder="*********"
+          />
+        </div>
 
-      <!-- sign up btn -->
-      <div>
-        <button
-          class="w-full mt-4 bg-[#FFAC00] rounded-full px-4 py-2 text-sm font-bold flex justify-center items-center space-x-2"
-        >
-         <span>Sign Up</span>  <ArrowRight />
-        </button>
-      </div>
-      <!-- sign up btn -->
+        <!-- sign up btn -->
+        <div>
+          <button
+            class="w-full mt-4 bg-[#FFAC00] rounded-full px-4 py-2 text-sm font-bold flex justify-center items-center space-x-2"
+          >
+            <span>Sign Up</span> <ArrowRight />
+          </button>
+        </div>
+        <!-- sign up btn -->
+      </form>
     </div>
     <!-- sidebar -->
 
@@ -50,3 +52,9 @@
     <!-- note introduction -->
   </div>
 </template>
+
+<script setup>
+function submit() {
+console.log('first')
+}
+</script>
