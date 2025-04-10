@@ -17,6 +17,7 @@
             >Email Address</label
           >
           <input
+            v-model="email"
             type="email"
             class="block w-full bg-[#27272A] border border-[#3F3F46] rounded text-white text-sm px-4 py-2 placeholder:text-zinc-500"
             placeholder="you@example.com"
@@ -28,6 +29,7 @@
             >Password</label
           >
           <input
+            v-model="password"
             type="password"
             class="block w-full bg-[#27272A] border border-[#3F3F46] rounded text-white text-sm px-4 py-2 placeholder:text-zinc-500"
             placeholder="*********"
@@ -54,7 +56,21 @@
 </template>
 
 <script setup>
-function submit() {
-console.log('first')
+const email = ref("");
+const password = ref("");
+
+async function submit() {
+  console.log("mail", email.value);
+  console.log("pass", password.value);
+
+  const response = await $fetch('/api/user', {
+    method: 'POST',
+    body: {
+      email: email.value,
+      password: password.value,
+    }
+  })
+
+  console.log('res', response)
 }
 </script>
