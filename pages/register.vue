@@ -60,17 +60,24 @@ const email = ref("");
 const password = ref("");
 
 async function submit() {
-  console.log("mail", email.value);
-  console.log("pass", password.value);
+  try {
+    const response = await $fetch("/api/user", {
+      method: "POST",
+      body: {
+        email: email.value,
+        password: password.value,
+      },
+    });
 
-  const response = await $fetch('/api/user', {
-    method: 'POST',
-    body: {
-      email: email.value,
-      password: password.value,
+    console.log("res", response);
+    const isConfirm =  await showSuccessAlert({message: 'account created successfully'})
+    if (isConfirm) {
+      navigateTo('/')
     }
-  })
-
-  console.log('res', response)
+  } catch (error) {
+    console.log("error", error?.response);
+    const msg = error?.response?._data?.message;
+    showErrorAlert({ message: msg });
+  }
 }
 </script>
