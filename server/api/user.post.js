@@ -2,13 +2,12 @@
 
 import bcrypt from "bcryptjs";
 import validator from "validator";
+import jwt from "jsonwebtoken";
 import prisma from "../utils/prisma";
-import {
-  HTTP_STATUS_CODES,
-  PRISMA_ERROR_CODES,
-} from "~/data/constant";
+import { HTTP_STATUS_CODES, PRISMA_ERROR_CODES } from "~/data/constant";
 
 export default defineEventHandler(async (event) => {
+  // console.log('event', event)
   const body = await readBody(event);
 
   if (!validator.isEmail(body.email)) {
@@ -28,7 +27,8 @@ export default defineEventHandler(async (event) => {
   ) {
     throw createError({
       statusCode: HTTP_STATUS_CODES.BAD_REQUEST,
-      message: "Password requires minimum 8 characters, include atleast 1 lowercase and 1 uppercase",
+      message:
+        "Password requires minimum 8 characters, include atleast 1 lowercase and 1 uppercase",
     });
   }
 
@@ -38,14 +38,22 @@ export default defineEventHandler(async (event) => {
     const passowrdHash = await bcrypt.hash(body.password, genSalt);
 
     // send to DB
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email: body.email,
         password: passowrdHash,
         salt: genSalt,
       },
     });
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "3h",
+    });
+
+    setCookie(event, 'appleNote', token)
+
     return { data: "success" };
+    
   } catch (err) {
     if (err.code === PRISMA_ERROR_CODES.UNIQUE_CONSTRAINT_FAILED) {
       throw createError({
