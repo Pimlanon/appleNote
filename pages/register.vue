@@ -7,8 +7,9 @@
         Sign up for a free account
       </h1>
       <p class="text-zinc-300 mt-0.5 text-sm">
-        Already registered?<span class="font-bold text-[#FFAC00]"> Log in </span
-        >to your account
+        Already registered?
+         <nuxt-link to="/login" class="font-bold text-[#FFAC00]"> Log in </nuxt-link>
+        to your account
       </p>
 
       <form @submit.prevent="submit">
