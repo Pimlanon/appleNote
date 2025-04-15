@@ -6,6 +6,7 @@ export const PRISMA_ERROR_CODES = {
   // HTTP Status Codes
   export const HTTP_STATUS_CODES = {
     CONFLICT: 409, 
+    UNAUTHORIZED: 401, 
     BAD_REQUEST: 400, 
     INTERNAL_SERVER_ERROR: 500, 
   }

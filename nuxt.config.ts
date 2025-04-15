@@ -25,11 +25,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
-  modules: ['@prisma/nuxt'],
+  modules: ['@prisma/nuxt', '@vueuse/nuxt',],
   vite: {
-    // ssr: {
-    //   noExternal: ['@prisma/client']
-    // },
     plugins: [
       tailwindcss(),
     ],
