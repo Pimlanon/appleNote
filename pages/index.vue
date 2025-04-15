@@ -1,78 +1,22 @@
 <template>
   <div class="flex bg-zinc-900 h-screen">
     <!-- sidebar -->
-    <div class="bg-black w-[338px] p-8">
+    <div class="bg-black w-[338px] p-8 overflow-auto">
       <Logo />
 
       <!-- today main container -->
-      <div>
-        <p class="font-xs font-bold text-[#C2C2C5] mt-12 mb-4">Today</p>
-
-        <div class="ml-4">
-          <div class="p-2 bg-[#A1842C] rounded-lg">
-            <h3 class="text-sm font-bold text-[#F4F4F5]">
-              Just Finished Reading...
-            </h3>
-            <div class="leading-none">
-              <span class="text-xs text-[#F4F4F5] mr-4">Today</span>
-              <span class="text-xs text-[#D6D6D6]"
-                >The modnight library...</span
-              >
-            </div>
-          </div>
-          <div class="p-2">
-            <h3 class="text-sm font-bold text-[#F4F4F5]">
-              Just Finished Reading...
-            </h3>
-            <div class="leading-none">
-              <span class="text-xs text-[#F4F4F5] mr-4">Today</span>
-              <span class="text-xs text-[#C2C2C5]"
-                >The modnight library...</span
-              >
-            </div>
-          </div>
-        </div>
-      </div>
+     <note-card :notes="todayNotes" :dateTitle="'Today'" v-model:selectedNotes="selectedNotes" />
       <!-- today main container -->
 
-      <div>
-        <p class="font-xs font-bold text-[#C2C2C5] mt-12 mb-4">Yesterday</p>
-
-        <!-- yesterday main container -->
-        <div class="ml-4">
-          <div class="p-2 bg-[#A1842C] rounded-lg">
-            <h3 class="text-sm font-bold text-[#F4F4F5]">
-              Just Finished Reading...
-            </h3>
-            <div class="leading-none">
-              <span class="text-xs text-[#F4F4F5] mr-4">Today</span>
-              <span class="text-xs text-[#D6D6D6]"
-                >The modnight library...</span
-              >
-            </div>
-          </div>
-          <div class="p-2">
-            <h3 class="text-sm font-bold text-[#F4F4F5]">
-              Just Finished Reading...
-            </h3>
-            <div class="leading-none">
-              <span class="text-xs text-[#F4F4F5] mr-4">Today</span>
-              <span class="text-xs text-[#C2C2C5]"
-                >The modnight library...</span
-              >
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- yesterday main container -->
+      <note-card :notes="yesterdayNotes" :dateTitle="'Yesterday'" v-model:selectedNotes="selectedNotes" />
       <!-- yesterday main container -->
 
-      <h1 class="text-white font-bold text-lg mt-8">Log in to your account</h1>
-      <p class="text-zinc-300 mt-0.5 text-sm">
-        Don't have an account?
-        <nuxt-link to="/register" class="font-bold text-[#FFAC00]">
-          Sign up
-        </nuxt-link>
-      </p>
+      <!-- earlier days main container -->
+      <note-card :notes="earlierNotes" :dateTitle="'Earlier'" v-model:selectedNotes="selectedNotes" />
+      <!-- earlier main container -->
+
+      
     </div>
     <!-- sidebar -->
 
@@ -88,33 +32,14 @@
         <button><Trash class="text-[#6D6D73] hover:text-white" /></button>
       </div>
 
-      <div class="text-[#D4D4D4] max-w-[437px] mx-auto space-y-2  h-3/4 overflow-auto">
-        <p class="text-[#929292] font-playfair">November 22nd, 2024</p>
-        <p class="font-playfair">
-          Finally moved into my tiny house today! After months of YouTube
-          tutorials, countless trips to Home Depot, and more scrapes and bruises
-          than I care to count, I'm officially a tiny home dweller. The sunset
-          streaming through my handmade stained glass window makes the whole 240
-          square feet glow like a jewel box. Still can't believe I built this
-          with my own two hands (and Dad's power tools).
+      <div
+        class="text-[#D4D4D4] max-w-[437px] mx-auto space-y-2 h-3/4 overflow-auto"
+      >
+        <p class="text-[#929292] font-playfair">
+          {{ formatToDDMMYYYY(selectedNotes.updatedAt) }}
         </p>
         <p class="font-playfair">
-          Living small means getting creative with space. Today I installed my
-          fold-down desk that transforms into a dining table - probably my
-          proudest DIY achievement yet. The copper pipes and reclaimed wood give
-          it this amazing steampunk vibe I wasn't even planning. Had my first
-          meal on it tonight: takeout ramen and a victory beer, because after
-          all that building, cooking was definitely not happening.
-        </p>
-        <p class="font-playfair">
-          My favorite spot is the reading nook by the window. I've got all my
-          favorite books within arm's reach, arranged by color because why not?
-          The cushions I sewed last weekend turned out surprisingly well,
-          considering my last sewing project was a very lopsided pencil case in
-          7th grade. The fairy lights make everything feel magical at night,
-          like I'm living in some kind of woodland cottage rather than parked in
-          my parents' backyard. Next project: figuring out how to grow herbs in
-          vertical planters without blocking my only source of natural light!
+          {{ selectedNotes.text }}
         </p>
       </div>
     </div>
@@ -123,9 +48,64 @@
 </template>
 
 <script setup>
+const notes = ref([]);
+const selectedNotes = ref({});
+
+const todayNotes = computed(() => {
+  return notes.value.filter((note) => {
+    const isToday = getRelativeDayLabel(note.updatedAt) === "today";
+    console.log("note:", note.id, note.updatedAt, "-> isToday:", isToday);
+    return isToday;
+  });
+});
+
+const yesterdayNotes = computed(() => {
+  return notes.value.filter((note) => {
+    const isYesterday = getRelativeDayLabel(note.updatedAt) === "yesterday";
+    console.log(
+      "note:",
+      note.id,
+      note.updatedAt,
+      "-> isYesterday:",
+      isYesterday
+    );
+    return isYesterday;
+  });
+});
+
+const earlierNotes = computed(() => {
+  return notes.value.filter((note) => {
+    const isEarlier = getRelativeDayLabel(note.updatedAt) === "earlier";
+    console.log(
+      "note:",
+      note.id,
+      note.updatedAt,
+      "-> isEarlier:",
+      isEarlier
+    );
+    return isEarlier;
+  });
+});
+
+// watchEffect(() => {
+//   console.log('✅ todaysNotes:', todayNotes.value);
+// });
+
+console.log("todayNotes", todayNotes.value);
+
 definePageMeta({
   // references to middlware/auth.js
   // when visit this page, it will run code in auth.js , before render anything of index.vue
   middleware: ["auth"],
+});
+
+onMounted(async () => {
+  const res = await $fetch("/api/notes");
+  notes.value = res;
+
+  if (res.length > 0) {
+    selectedNotes.value = res[0];
+  }
+  console.log("res", res);
 });
 </script>
