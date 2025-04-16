@@ -8,10 +8,10 @@
         v-bind:key="note?.id"
         class="p-2 rounded-lg cursor-pointer"
         :class="{
-          'bg-[#A1842C]': note?.id === selectedNotes?.id,
-          'hover:bg-[#A1842C]/50': note?.id !== selectedNotes?.id,
+          'bg-[#A1842C]': note?.id === selectedNote?.id,
+          'hover:bg-[#A1842C]/50': note?.id !== selectedNote?.id,
         }"
-        @click="emit('update:selectedNotes', note)"
+        @click="emit('update:selectedNote', note)"
       >
         <h3 class="text-sm font-bold text-[#F4F4F5] truncate">
           {{ note.text.substring(0, 50) }}
@@ -33,10 +33,10 @@
 const props = defineProps({
   notes: Array,
   dateTitle: String,
-  selectedNotes: Object,
+  selectedNote: Object,
 });
 
-const emit = defineEmits(["update:selectedNotes"]);
+const emit = defineEmits(["update:selectedNote"]);
 // watch(() => props.notes, (newVal) => {
 //   console.log('notes changed to', newVal);
 // });

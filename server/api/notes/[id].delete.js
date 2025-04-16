@@ -1,11 +1,11 @@
-// api/notes/[id] PATCH
+// api/notes/[id] DELETE
+
 import jwt from "jsonwebtoken";
 import { HTTP_STATUS_CODES } from "~/data/constant";
 
 export default defineEventHandler(async (event) => {
   try {
-    const body = await readBody(event);
-    const id = getRouterParam(event, "id"); // this 'id' samr as filename [id].js
+    const id = getRouterParam(event, "id");
 
     const cookies = parseCookies(event);
     const token = cookies.appleNote;
@@ -21,9 +21,9 @@ export default defineEventHandler(async (event) => {
 
     const targetNote = await prisma.note.findUnique({
       where: {
-        id: Number(id)
-      }
-    })
+        id: Number(id),
+      },
+    });
 
     if (!targetNote) {
       throw createError({
@@ -39,20 +39,19 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    await prisma.note.update({
+    await prisma.note.delete({
       where: {
         id: Number(id),
       },
-      data: {
-        text: body.updatedNote,
-      },
     });
+
+    return { data: "success" };
   } catch (err) {
-    console.log("PATCH-notes/id err", err);
+    console.log("DELETE-notes/id err", err);
     throw createError({
-      statusCode: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
-      statusMessage: "Internal Server Error",
-      data: err,
-    });
+        statusCode: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+        statusMessage: "Internal Server Error",
+        data: err,
+      });
   }
 });

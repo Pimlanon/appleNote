@@ -8,21 +8,21 @@
       <note-card
         :notes="todayNotes"
         :dateTitle="'Today'"
-        v-model:selectedNotes="selectedNotes"
+        v-model:selectedNote="selectedNote"
       />
 
       <!-- yesterday main container -->
       <note-card
         :notes="yesterdayNotes"
         :dateTitle="'Yesterday'"
-        v-model:selectedNotes="selectedNotes"
+        v-model:selectedNote="selectedNote"
       />
 
       <!-- earlier days main container -->
       <note-card
         :notes="earlierNotes"
         :dateTitle="'Earlier'"
-        v-model:selectedNotes="selectedNotes"
+        v-model:selectedNote="selectedNote"
       />
     </div>
     <!-- sidebar -->
@@ -37,14 +37,16 @@
           <Pen />
           <span> Create Note </span>
         </button>
-        <button><Trash class="text-[#6D6D73] hover:text-white" /></button>
+        <button>
+          <Trash @click="deleteNote" class="text-[#6D6D73] hover:text-white" />
+        </button>
       </div>
 
       <div
         class="text-[#D4D4D4] max-w-[437px] mx-auto space-y-2 w-full flex-grow flex flex-col"
       >
-        <p v-if="selectedNotes.updatedAt" class="text-[#929292] font-playfair">
-          {{ formatToDDMMYYYY(selectedNotes.updatedAt) }}
+        <p v-if="selectedNote.updatedAt" class="text-[#929292] font-playfair">
+          {{ formatToDDMMYYYY(selectedNote.updatedAt) }}
         </p>
         <textarea
           ref="textarea"
@@ -56,7 +58,14 @@
         >
         </textarea>
       </div>
+      <button
+        @click="logout"
+        class="text-[#C2C2C5] hover:text-white text-sm font-bold absolute right-0 bottom-0 p-8"
+      >
+        Log out
+      </button>
     </div>
+
     <!-- note container -->
   </div>
 </template>
@@ -65,7 +74,7 @@
 const updatedNote = ref("");
 const textarea = ref(null);
 const notes = ref([]);
-const selectedNotes = ref({});
+const selectedNote = ref({});
 
 definePageMeta({
   // references to middlware/auth.js
@@ -73,9 +82,15 @@ definePageMeta({
   middleware: ["auth"],
 });
 
-watch(selectedNotes, (newNote) => {
+watch(selectedNote, (newNote) => {
   updatedNote.value = newNote.text || "";
 });
+
+function logout() {
+  const jwtCookie = useCookie("appleNote");
+  jwtCookie.value = null;
+  navigateTo("/login");
+}
 
 async function createNewNote() {
   try {
@@ -85,71 +100,90 @@ async function createNewNote() {
         updatedNote: "",
       },
     });
-    console.log("create-res", newNote);
+
     const newNoteData = newNote.context;
     notes.value.unshift(newNoteData);
-    selectedNotes.value = newNoteData;
+    selectedNote.value = newNoteData;
     updatedNote.value = newNoteData.text;
 
-    // make focus since create a new one
-    textarea.value.focus();
+    // make focus when create a new one
+    textarea?.value?.focus();
   } catch (err) {
     console.log("createNote err", err);
+    const msg =
+      err?.response?._data?.data?.message || err?.response?._data?.message;
+    showErrorAlert({ message: msg });
   }
 }
-console.log("notes", notes.value);
+
+async function deleteNote() {
+  try {
+    const isConfirm = await showWarningAlert();
+
+    if (isConfirm) {
+      const res = await $fetch(`/api/notes/${selectedNote.value.id}`, {
+        method: "DELETE",
+      });
+
+      if (res.data === "success") {
+        const index = notes.value.findIndex((note) => {
+          return note.id === selectedNote.value.id;
+        });
+
+        // delete note
+        notes.value.splice(index, 1);
+
+        // case 1: notes still exist at the same index (next note moves into that position (same idx))
+        if (notes.value.length > index) {
+          selectedNote.value = notes.value[index];
+          updatedNote.value = notes.value[index].text;
+
+          // case 2: delete last item, but still has other notes >> go to select the first note
+        } else if (notes.value.length > 0) {
+          selectedNote.value = notes.value[0];
+          updatedNote.value = notes.value[0].text;
+
+          // case 3: no notes left >> create a new note
+        } else {
+          createNewNote();
+        }
+      }
+    }
+  } catch (err) {
+    console.log("deleteNote err", err);
+    const msg =
+      err?.response?._data?.data?.message || err?.response?._data?.message;
+    showErrorAlert({ message: msg });
+  }
+}
 
 const debouncedFn = useDebounceFn(async () => {
   await updateNote();
-  console.log("segsdgsdgsdgdsg");
 }, 1000);
 
 async function updateNote() {
-  console.log("updateNote", updatedNote.value);
   try {
-    await $fetch(`/api/notes/${selectedNotes.value.id}`, {
+    await $fetch(`/api/notes/${selectedNote.value.id}`, {
       method: "PATCH",
       body: {
         updatedNote: updatedNote.value,
       },
     });
-
-    // get new update
-    // const res = await $fetch("/api/notes");
-    // notes.value = res;
-
-    // if (res.length > 0) {
-    //   const findUpdatedNote = res.find((note) => {
-    //     return note.id === Number(selectedNotes?.value?.id);
-    //   });
-    //   console.log("findUpdatedNote", findUpdatedNote);
-    //   if (findUpdatedNote) {
-    //     // Remove the note if it already exists
-    //     notes.value = notes.value.filter(
-    //       (note) => note.id !== findUpdatedNote.id
-    //     );
-
-    //     // Add it to the top
-    //     notes.value.unshift(findUpdatedNote);
-
-    //     // Update selected and textarea
-    //     selectedNotes.value = findUpdatedNote;
-    //     updatedNote.value = findUpdatedNote.text;
-    //   }
-    // }
   } catch (err) {
     console.log("updateNote err", err);
+    const msg =
+      err?.response?._data?.data?.message || err?.response?._data?.message;
+    showErrorAlert({ message: msg });
   }
 }
 function handleInput() {
   debouncedFn();
-  selectedNotes.value.text = updatedNote.value;
+  selectedNote.value.text = updatedNote.value;
 }
 
 const todayNotes = computed(() => {
   return notes.value.filter((note) => {
     const isToday = getRelativeDayLabel(note.updatedAt) === "today";
-    // console.log("note:", note.id, note.updatedAt, "-> isToday:", isToday);
     return isToday;
   });
 });
@@ -157,13 +191,6 @@ const todayNotes = computed(() => {
 const yesterdayNotes = computed(() => {
   return notes.value.filter((note) => {
     const isYesterday = getRelativeDayLabel(note.updatedAt) === "yesterday";
-    // console.log(
-    //   "note:",
-    //   note.id,
-    //   note.updatedAt,
-    //   "-> isYesterday:",
-    //   isYesterday
-    // );
     return isYesterday;
   });
 });
@@ -171,16 +198,13 @@ const yesterdayNotes = computed(() => {
 const earlierNotes = computed(() => {
   return notes.value.filter((note) => {
     const isEarlier = getRelativeDayLabel(note.updatedAt) === "earlier";
-    console.log("note:", note.id, note.updatedAt, "-> isEarlier:", isEarlier);
     return isEarlier;
   });
 });
 
 // watchEffect(() => {
-//   console.log('✅ todaysNotes:', todayNotes.value);
+//   console.log('todaysNotes:', todayNotes.value);
 // });
-
-console.log("todayNotes", todayNotes.value);
 
 onMounted(async () => {
   const res = await $fetch("/api/notes");
@@ -188,12 +212,13 @@ onMounted(async () => {
   notes.value.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
   if (res.length > 0) {
-    selectedNotes.value = res[0];
-    updatedNote.value = selectedNotes.value.text;
+    selectedNote.value = res[0];
+    updatedNote.value = selectedNote.value.text;
 
-    // make focus since came to index page
-    textarea.value.focus();
+    // make focus when came to index page
+    textarea?.value?.focus();
+  } else {
+    await createNewNote();
   }
-  console.log("res", res);
 });
 </script>

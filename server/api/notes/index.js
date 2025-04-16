@@ -6,7 +6,6 @@ export default defineEventHandler(async (event) => {
   try {
     const cookies = parseCookies(event)
     const token = cookies.appleNote;
-    console.log('token--', token)
 
     if (!token) {
         throw createError({
@@ -16,7 +15,6 @@ export default defineEventHandler(async (event) => {
     }
 
     const decodedToken = await jwt.verify(token, process.env.JWT_SECRET)
-    console.log('decodedToken', decodedToken)
 
     const notes = await prisma.note.findMany({
         where: {

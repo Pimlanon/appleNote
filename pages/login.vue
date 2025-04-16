@@ -61,7 +61,7 @@ const password = ref("");
 
 async function submit() {
   try {
-    const response = await $fetch("/api/login", {
+     await $fetch("/api/login", {
       method: "POST",
       body: {
         email: email.value,
@@ -69,11 +69,9 @@ async function submit() {
       },
     });
 
-    console.log("res", response);
     const isConfirm =  await showSuccessAlert({message: 'logged in successfully'})
     if (isConfirm) {
       navigateTo('/')
-      // window.location.href = "/";
     }
   } catch (error) {
     console.log("error", error?.response);
