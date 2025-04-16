@@ -10,7 +10,6 @@
         :dateTitle="'Today'"
         v-model:selectedNotes="selectedNotes"
       />
-      <!-- today main container -->
 
       <!-- yesterday main container -->
       <note-card
@@ -18,7 +17,6 @@
         :dateTitle="'Yesterday'"
         v-model:selectedNotes="selectedNotes"
       />
-      <!-- yesterday main container -->
 
       <!-- earlier days main container -->
       <note-card
@@ -26,7 +24,6 @@
         :dateTitle="'Earlier'"
         v-model:selectedNotes="selectedNotes"
       />
-      <!-- earlier main container -->
     </div>
     <!-- sidebar -->
 
@@ -34,6 +31,7 @@
     <div class="w-full flex flex-col pb-8">
       <div class="flex justify-between w-full items-start p-8">
         <button
+          @click="createNewNote"
           class="inline-flex items-center space-x-2 text-xs text-[#C2C2C5] font-bold hover:text-white"
         >
           <Pen />
@@ -49,11 +47,12 @@
           {{ formatToDDMMYYYY(selectedNotes.updatedAt) }}
         </p>
         <textarea
+          ref="textarea"
           v-model="updatedNote"
           name="note"
           id="note"
           class="font-playfair w-full bg-transparent focus:outline-none resize-none flex-grow"
-          @input="debouncedFn"
+          @input="handleInput"
         >
         </textarea>
       </div>
@@ -64,6 +63,7 @@
 
 <script setup>
 const updatedNote = ref("");
+const textarea = ref(null);
 const notes = ref([]);
 const selectedNotes = ref({});
 
@@ -76,6 +76,28 @@ definePageMeta({
 watch(selectedNotes, (newNote) => {
   updatedNote.value = newNote.text || "";
 });
+
+async function createNewNote() {
+  try {
+    const newNote = await $fetch(`/api/notes`, {
+      method: "POST",
+      body: {
+        updatedNote: "",
+      },
+    });
+    console.log("create-res", newNote);
+    const newNoteData = newNote.context;
+    notes.value.unshift(newNoteData);
+    selectedNotes.value = newNoteData;
+    updatedNote.value = newNoteData.text;
+
+    // make focus since create a new one
+    textarea.value.focus();
+  } catch (err) {
+    console.log("createNote err", err);
+  }
+}
+console.log("notes", notes.value);
 
 const debouncedFn = useDebounceFn(async () => {
   await updateNote();
@@ -93,22 +115,41 @@ async function updateNote() {
     });
 
     // get new update
-    const res = await $fetch("/api/notes");
-    notes.value = res;
+    // const res = await $fetch("/api/notes");
+    // notes.value = res;
 
-    if (res.length > 0) {
-      selectedNotes.value = res.id[selectedNotes.value.id];
-      updatedNote.value = selectedNotes.value.text;
-    }
+    // if (res.length > 0) {
+    //   const findUpdatedNote = res.find((note) => {
+    //     return note.id === Number(selectedNotes?.value?.id);
+    //   });
+    //   console.log("findUpdatedNote", findUpdatedNote);
+    //   if (findUpdatedNote) {
+    //     // Remove the note if it already exists
+    //     notes.value = notes.value.filter(
+    //       (note) => note.id !== findUpdatedNote.id
+    //     );
+
+    //     // Add it to the top
+    //     notes.value.unshift(findUpdatedNote);
+
+    //     // Update selected and textarea
+    //     selectedNotes.value = findUpdatedNote;
+    //     updatedNote.value = findUpdatedNote.text;
+    //   }
+    // }
   } catch (err) {
     console.log("updateNote err", err);
   }
+}
+function handleInput() {
+  debouncedFn();
+  selectedNotes.value.text = updatedNote.value;
 }
 
 const todayNotes = computed(() => {
   return notes.value.filter((note) => {
     const isToday = getRelativeDayLabel(note.updatedAt) === "today";
-    console.log("note:", note.id, note.updatedAt, "-> isToday:", isToday);
+    // console.log("note:", note.id, note.updatedAt, "-> isToday:", isToday);
     return isToday;
   });
 });
@@ -116,13 +157,13 @@ const todayNotes = computed(() => {
 const yesterdayNotes = computed(() => {
   return notes.value.filter((note) => {
     const isYesterday = getRelativeDayLabel(note.updatedAt) === "yesterday";
-    console.log(
-      "note:",
-      note.id,
-      note.updatedAt,
-      "-> isYesterday:",
-      isYesterday
-    );
+    // console.log(
+    //   "note:",
+    //   note.id,
+    //   note.updatedAt,
+    //   "-> isYesterday:",
+    //   isYesterday
+    // );
     return isYesterday;
   });
 });
@@ -144,10 +185,14 @@ console.log("todayNotes", todayNotes.value);
 onMounted(async () => {
   const res = await $fetch("/api/notes");
   notes.value = res;
+  notes.value.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
   if (res.length > 0) {
     selectedNotes.value = res[0];
     updatedNote.value = selectedNotes.value.text;
+
+    // make focus since came to index page
+    textarea.value.focus();
   }
   console.log("res", res);
 });

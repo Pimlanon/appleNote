@@ -1,12 +1,10 @@
-// api/notes/[id] PATCH
+// api/notes POST
 import jwt from "jsonwebtoken";
 import { HTTP_STATUS_CODES } from "~/data/constant";
 
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
-    const id = getRouterParam(event, "id"); // this 'id' samr as filename [id].js
-    console.log("id", id);
 
     const cookies = parseCookies(event);
     const token = cookies.appleNote;
@@ -20,36 +18,16 @@ export default defineEventHandler(async (event) => {
 
     const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
 
-    const targetNote = await prisma.note.findUnique({
-      where: {
-        id: Number(id)
-      }
-    })
-
-    if (!targetNote) {
-      throw createError({
-        statusCode: HTTP_STATUS_CODES.UNAUTHORIZED,
-        statusMessage: "Note does not exist",
-      });
-    }
-
-    if (targetNote.userId !== decodedToken.id) {
-      throw createError({
-        statusCode: HTTP_STATUS_CODES.UNAUTHORIZED,
-        statusMessage: "Does not have permission to update note",
-      });
-    }
-
-    await prisma.note.update({
-      where: {
-        id: Number(id),
-      },
+    const newNote = await prisma.note.create({
       data: {
         text: body.updatedNote,
+        userId: decodedToken.id,
       },
     });
+
+    return { data: "success", context: newNote };
   } catch (err) {
-    console.log("PATCH-notes/id err", err);
+    console.log("POST-notes err", err);
     throw createError({
       statusCode: HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
       statusMessage: "Internal Server Error",

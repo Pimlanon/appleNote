@@ -11,16 +11,18 @@
           'bg-[#A1842C]': note?.id === selectedNotes?.id,
           'hover:bg-[#A1842C]/50': note?.id !== selectedNotes?.id,
         }"
-         @click="emit('update:selectedNotes', note)"
+        @click="emit('update:selectedNotes', note)"
       >
         <h3 class="text-sm font-bold text-[#F4F4F5] truncate">
           {{ note.text.substring(0, 50) }}
         </h3>
         <div class="leading-none truncate text-[#D6D6D6]">
           <span class="text-xs text-[#F4F4F5] mr-4">{{
-            getRelativeDayLabel(note?.updatedAt)
+            formatToDDMMYYYY(note.updatedAt)
           }}</span>
-          <span class="text-xs"> ...{{ note.text.substring(50, 100) }}</span>
+          <span v-if="note.text.length > 50" class="text-xs">
+            {{ "..." + note.text.substring(50, 100) }}
+          </span>
         </div>
       </div>
     </div>
@@ -31,12 +33,11 @@
 const props = defineProps({
   notes: Array,
   dateTitle: String,
-  selectedNotes: Object
+  selectedNotes: Object,
 });
 
-const emit = defineEmits(['update:selectedNotes']);
+const emit = defineEmits(["update:selectedNotes"]);
 // watch(() => props.notes, (newVal) => {
 //   console.log('notes changed to', newVal);
 // });
-
 </script>
