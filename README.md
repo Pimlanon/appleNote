@@ -1,14 +1,12 @@
-**Apple Notes–Style Web App**
+# Apple Notes–Style Web App
 
 This project is a learning project created to understand the basics of Nuxt 3 and Vue.js, including both frontend and backend development within a single Nuxt application.
 
 The application is a simple Apple Notes–style web app that allows users to register, log in, and write personal notes. The note editor is designed to feel minimal and familiar, similar to Apple Notes, and supports automatic saving while typing.
 
----
+## Tech Stack
 
-**Tech Stack**
-
-Frontend: Nuxt 3, Vue 3
+Frontend: Nuxt 3, Vue
 
 Backend: Nuxt server routes
 
@@ -16,9 +14,9 @@ ORM: Prisma
 
 Database: MySQL
 
----
 
-**Features**
+
+## Features
 
 User registration and authentication
 
@@ -30,9 +28,7 @@ Apple Notes–like UI
 
 Auto-save notes without manual action
 
----
-
-**Project Purpose**
+## Project Purpose
 
 The goal of this project is to:
 
@@ -44,11 +40,14 @@ Understand backend integration with Prisma and MySQL
 
 Implement real-world features such as authentication and auto-save
 
----
 
-**Notes**
+## Notes
 
 This project is intended for educational purposes and focuses on simplicity and clarity rather than production-level features.
+
+## Preview
+<img width="1579" height="1133" alt="image" src="https://github.com/user-attachments/assets/0bc8755d-3727-4c8c-90cc-a0cb571508b0" />
+
 
 ---
 
