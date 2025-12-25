@@ -18,27 +18,27 @@ Database: MySQL
 
 ## Features
 
-User registration and authentication
+- User registration and authentication
 
-Secure login system
+- Secure login system
 
-Create and edit notes
+- Create and edit notes
 
-Apple Notes–like UI
+- Apple Notes–like UI
 
-Auto-save notes without manual action
+- Auto-save notes without manual action
 
 ## Project Purpose
 
 The goal of this project is to:
 
-Learn the fundamentals of Nuxt 3 and Vue 3
+- Learn the fundamentals of Nuxt 3 and Vue 3
 
-Practice building a full-stack web application using Nuxt
+- Practice building a full-stack web application using Nuxt
 
-Understand backend integration with Prisma and MySQL
+- Understand backend integration with Prisma and MySQL
 
-Implement real-world features such as authentication and auto-save
+- Implement real-world features such as authentication and auto-save
 
 
 ## Notes
